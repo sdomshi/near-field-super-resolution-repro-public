@@ -22,75 +22,28 @@
 %
 % This code is provided "as is", without warranty of any kind.
 %
-% This single MATLAB file contains the complete LCS example implementation:
-% configuration, support-uniform LCS bound routines, deterministic sampling
-% diagnostics, QPAC constant assembly, and LaTeX table generation.
+% This single MATLAB file contains the complete LCS example implementation.
 % No external MATLAB files or input data files are required.
 %
 % Run in MATLAB:
 %     result = run_lcs_example_qpac();
 
 function result = run_lcs_example_qpac()
-%RUN_LCS_EXAMPLE_QPAC Correlation-route example for the QPAC condition.
+%RUN_LCS_EXAMPLE_QPAC Verify QPAC using lag-correlation support bounds.
 %
-% This program implements the revised QPAC sufficient-condition budgets
-%
-%   eta_near(delta)
-%     = 2*delta*D3(delta)/(3*m_near)
-%       + delta^2*D2(delta)^2/(2*m_near),
-%
-%   eta_far(delta)
-%     = sup_q sum_l [Gamma_K B_K(q,p_l)+Gamma_H B_H(q,p_l)].
-%
-% Source contributions are summed at a common evaluation point before the
-% supremum is taken, as required by the corrected far-region quantity.
-%
-% Model and support class
-% -----------------------
-% The prescribed support class is the singleton
-%
-%   S_* = {(r_1,pi/2),(r_2,pi/2)}.
-%
-% The two sources therefore have the same bearing and different ranges.
-% Their support--support interaction is bounded by the lag-correlation
-% split (LCS), including the complete quadratic lag phase.  The evaluation
-% angle remains continuous on a connected interval, and both range rows are
-% retained.  Hence the far set has a genuine interface with the near set.
-% All physical and numerical parameters are explicit in default_config();
-% the program performs no hidden parameter tuning.
-%
-% Kernel envelopes and continuum enclosure
-% -----------------------------------------
-% The file implements support-uniform analytical bounds for K,H,d2K,d2H,
-% d3K,d3H.  On every closed physical cell, it constructs a containing
-% quadratic-phase rectangle and evaluates the Der/LCS/ResLin alternatives.
-% The higher channels additionally use the five-atom Q2 or nine-atom Q3
-% dictionary and a fast l1/Cauchy cap.  Source contributions are summed at
-% the same evaluation cell before maximization.
-%
-% Independently, D2 and the far row are evaluated on uniform
-% one-dimensional covers.  If F_a is a common-point row sum on a cell of
-% width h, the DirSum alternative uses
-%
-%   sup_cell F_a <= max_node F_a + (h/2)*L_a,
-%
-% with analytic physical-derivative caps L_a.  This is a continuum bound,
-% not a sampled maximum.  A direct Q3 profile gives a second uniform D3
-% bound without a fourth derivative.  The reported QPAC budget uses the
-% smallest enabled valid bound for each row.  Candidate values and selected
-% branches are retained in the output structure for reproducibility.
-%
-% Continuum coverage follows from the analytical cell enclosures rather than
-% from grid sampling.  Numerical values are evaluated in MATLAB double
-% precision.
-%
-% Usage
-% -----
 %   result = run_lcs_example_qpac();
-% Requires MATLAB R2016b or later (implicit array expansion).
+%
+% The support consists of two sources at the same angle and on distinct
+% range rows. Lag correlation bounds the four support-interaction channels.
+% Analytic cell bounds and Lipschitz padding control the near and far row
+% sums over the continuous angular domain. The output records each candidate
+% bound, the selected branch, and the resulting QPAC recovery number.
+%
+% Calculations use MATLAB double precision. MATLAB R2016b or later is
+% required for implicit array expansion.
 %
 
-%% 1. Physical and numerical configuration
+%% 1. Model and numerical settings
 par = default_config();
 validate_config(par);
 
@@ -118,7 +71,7 @@ flatEndOK = all(abs(geom.b(1:4)) == 0) && ...
 assert(flatEndOK,'QPAC:TaperNotFlat', ...
     'The first and last four taper entries must vanish.');
 
-%% 2. Fixed-support lag-correlation bounds
+%% 2. Support bounds from lag correlation
 % Channel order:
 %   K,H,dK,dH,d2K,d3K,d2H,d3H.
 % dK,dH are normalized tangent channels; d2/d3 are physical angular
@@ -205,7 +158,7 @@ for io = 1:nOrient
 end
 derivativeThresholdPassed = min(dNplus) >= par.derivativeThreshold;
 
-%% 3. Algebraic self checks and curvature margin
+%% 3. Self checks and curvature margin
 selfIdentityError = zeros(par.L,4);
 for ell = 1:par.L
     Cself = evaluate_source(support.range(ell),support.theta(ell), ...
@@ -251,9 +204,9 @@ mNearOK = isfinite(mNear) && mNear > 0;
 assert(mNearOK,'QPAC:NonpositiveCurvatureMargin', ...
     'The curvature margin is not positive.');
 
-%% 4. Corrected common-point local and far budgets
-% Every range row contains one support at theta0.  Consequently the complete
-% ambient Taylor segment on that row is [theta0-delta,theta0+delta].
+%% 4. Near and far row-sum bounds
+% Each range row contains one support at theta0. The Taylor interval on that
+% row is [theta0-delta,theta0+delta].
 nearGrid = linspace(par.theta0-par.delta, ...
                     par.theta0+par.delta,par.nNear);
 farLeftGrid = linspace(par.thetaDomain(1), ...
@@ -307,9 +260,8 @@ if coarseFarRightCellEdges(end) < farRightCellEdges(end)
     coarseFarRightCellEdges(end+1) = farRightCellEdges(end); %#ok<AGROW>
 end
 
-% Coefficient preprocessing is independent of the evaluation cell and is
-% therefore done once.  The cache contains normalized K/H coefficients and
-% the common nine-atom higher-derivative dictionary (Q2 uses its first five).
+% Precompute normalized K/H coefficients and the nine-atom derivative
+% dictionary. The Q2 construction uses its first five atoms.
 analyticKernelCache = build_analytic_kernel_cache( ...
     support,geom,par);
 
@@ -325,9 +277,8 @@ for ir = 1:par.L
     [LF0,LF2] = row_lipschitz_constants( ...
         support,Gamma,geom,profileCaps{ir},par);
 
-    % Support-uniform analytical bounds. Every cell covers a continuum of
-    % evaluation angles, and source contributions are summed at that same
-    % cell before maximization.
+    % Each cell bound holds for every evaluation angle in the cell. Sum the
+    % source contributions before maximizing over cells.
     D2KernelInfo = higher_derivative_kernel_row_bound( ...
         2,rEval,localCellEdges,support,Gamma, ...
         analyticKernelCache,geom,par);
@@ -339,9 +290,7 @@ for ir = 1:par.L
         rEval,{farLeftCellEdges,farRightCellEdges}, ...
         support,Gamma,analyticKernelCache,geom,par);
 
-    % Independent direct uniform order-three fallback on the complete
-    % segment.  It uses only the explicit Q3 phase profile and also avoids
-    % every fourth-derivative argument.
+    % Direct third-derivative bound on the full local interval.
     D3Direct = direct_third_derivative_row_bound( ...
         rEval,localSegment,support,Gamma,geom,par);
     D3Direct = D3Direct + ...
@@ -400,7 +349,7 @@ for ir = 1:par.L
     farSelectedBranchByRow(ir) = farSelectedBranch;
     farAnalyticAuditByRow(ir) = farKernelInfo.pointAuditOK;
 
-    % A nested coarse cover is a stability audit, not a second theorem.
+    % Repeat the calculation on a nested coarser cover as a stability check.
     idxNear = 1:2:par.nNear;
     idxFar = 1:2:par.nFar;
     D2CoarseDirSum = max(F2Near(idxNear)) + hNear*LF2 + ...
@@ -482,8 +431,7 @@ assert(all(farAnalyticAuditByRow),'QPAC:KernelFarPointAudit', ...
     ['A support-uniform K/H far-cell bound is below an endpoint or ', ...
      'midpoint audit value.']);
 
-% These maxima are taken only after each source contribution has been
-% evaluated and summed at the same q.
+% Form each maximum after summing all source contributions at the same q.
 D2 = max(D2SelectedByRow);
 D3 = max(D3SelectedByRow);
 etaFar = max(farSelectedByRow);
@@ -498,7 +446,7 @@ etaFarCoarse = max(farCoarseByRow);
 etaNearCoarse = 2*par.delta*D3Coarse/(3*mNear) + ...
     par.delta^2*D2Coarse^2/(2*mNear);
 
-%% 5. Explicit audit flags
+%% 5. Consistency checks
 endpointScale = max(1,max(abs([par.thetaDomain,par.theta0,par.delta])));
 endpointTolerance = 64*eps(endpointScale);
 supportCellCoverageOK = numel(support.range) == par.L && ...
@@ -522,8 +470,8 @@ farCoverageOK = ...
     abs(farLeftGrid(end)-(par.theta0-par.delta)) <= endpointTolerance && ...
     abs(farRightGrid(1)-(par.theta0+par.delta)) <= endpointTolerance && ...
     abs(farRightGrid(end)-par.thetaDomain(2)) <= endpointTolerance;
-% The next properties follow from evaluate_common_rows using one q vector
-% for every source term and from the single par.delta used above.
+% evaluate_common_rows uses the same q vector for every source term. The
+% near and far intervals use the same value of par.delta.
 commonPointNearByConstruction = true;
 commonPointFarByConstruction = true;
 sameRadiusByConstruction = true;
@@ -566,7 +514,7 @@ if ~numericalQPACOK
          'budgets and audit flags; no recovery claim is made by this run.']);
 end
 
-%% 6. Package and save reproducibility outputs
+%% 6. Assemble and save results
 result = struct();
 result.parameters = par;
 result.boundSelection = struct( ...
@@ -725,10 +673,10 @@ save(matPath,'result');
 print_summary(result,summary);
 end
 
-%% Configuration and validation
+%% Configuration
 function par = default_config()
 par = struct();
-par.c0 = 299792458;
+par.c0 = 3e8;
 par.fc = 100e9;
 par.lambda = par.c0/par.fc;
 par.k = 2*pi/par.lambda;
@@ -752,14 +700,13 @@ par.selfIdentityTolerance = 2e-11;
 par.lagResidualTolerance = 1e-8;
 par.derivativeThreshold = 0.1;
 
-% Support-uniform analytical kernel bounds for K/H and their second and
+% Support-uniform analytic kernel bounds for K/H and their second and
 % third evaluation-angle derivatives.
 par.kernelBound = struct();
 par.kernelBound.QList = [2 8 16 32];
 par.kernelBound.pList = 1:8;
 par.kernelBound.localCells = 16;
-% Increase this value for tighter analytical far-cell envelopes; 64 keeps
-% the public example reasonably quick while retaining an independent bound.
+% More cells give tighter far-region envelopes at a higher runtime.
 par.kernelBound.farCellsPerSide = 64;
 par.kernelBound.lcsSafety = 1e-12;
 par.kernelBound.autoDeltaSafety = 0.98;
@@ -779,9 +726,7 @@ par.kernelBound.linearAWindow = 0.12;
 par.kernelBound.autoGammaSafety = 0.98;
 par.kernelBound.autoGammaMin = 1e-12;
 
-% Candidate-bound policy. All implemented continuum bounds are enabled by
-% default, and the smallest finite valid bound is selected independently on
-% each range row. Disabling a method is useful for ablation studies.
+% Select the smallest finite enabled bound independently on each range row.
 par.methods = struct();
 par.methods.enableAnalyticKernel = true;
 par.methods.enableDirSum = true;
@@ -988,7 +933,7 @@ C(7,:) = abs(sum(1i*b.*hs.*Q2.*phase,1));
 C(8,:) = abs(sum(1i*b.*hs.*Q3.*phase,1));
 end
 
-%% Fixed-point lag-correlation split
+%% Fixed-point lag-correlation bound
 function out = lcs_fixed_point_bound( ...
     a,omega1,omega2,QList,roundoffFactor)
 % For a singleton physical cell, the lag phase is a point.  Expanding each
@@ -1065,7 +1010,7 @@ out = struct('bound',max(real(best),0), ...
     'maxRelativeLagExpansionResidual',maxRelativeResidualAtBest);
 end
 
-%% Support-uniform analytical kernel bounds
+%% Support-uniform analytic kernel bounds
 function cache = build_analytic_kernel_cache( ...
     support,geom,par)
 % The Q3 dictionary is exactly the one used in
@@ -1168,9 +1113,7 @@ for ic = 1:nCells
         Gamma(2)*sum(pairH(:,ic));
 end
 
-% Numerical endpoint/midpoint audit of the cellwise envelopes.  This does
-% not replace the analytic cell proof; it catches transcription/indexing
-% errors in the implementation.
+% Check each cell envelope at its endpoints and midpoint.
 pointAuditOK = true;
 maxPointRatioK = 0;
 maxPointRatioH = 0;
@@ -1254,7 +1197,7 @@ for iset = 1:numel(edgeSets)
     end
 end
 
-% Endpoint/midpoint transcription audit.
+% Check each cell envelope at its endpoints and midpoint.
 pointAuditOK = true;
 maxPointRatioK = 0;
 maxPointRatioH = 0;
@@ -1352,8 +1295,7 @@ end
 
 function [BK,BH] = higher_derivative_fast_caps( ...
     order,rSource,thetaSource,rEval,thetaCell,geom,par)
-% Fast l1/Cauchy caps. They are independent valid alternatives to the
-% dictionary-based analytical envelope.
+% Fast l1/Cauchy caps provide alternatives to the dictionary bound.
 [cLo,cHi] = cos_interval(thetaCell);
 [c2Lo,c2Hi] = cos_interval(2*thetaCell);
 [sLo,sHi] = cos_interval(thetaCell-pi/2);
@@ -1493,9 +1435,7 @@ end
 
 function [Bbest,bestBranch] = kernel_scalar_analytic_cell_bound( ...
     coeff,phaseBox,par)
-% Scalar support-uniform envelope using the following analytical branches:
-% l1 fallback, Der, LCS, and ResLin.  The minimum of valid upper bounds is
-% again a valid upper bound.
+% Take the smallest valid bound among the l1, Der, LCS, and ResLin branches.
 candidates = coeff.l1;
 labels = "l1";
 
@@ -1938,7 +1878,7 @@ values = [ ...
 value = max(abs(values));
 end
 
-%% Curvature and continuum-padding helpers
+%% Curvature and continuum padding
 function [tauLo,tauHi] = tau_interval(ranges,thetaDomain,d)
 [cLo,cHi] = cos_interval(thetaDomain);
 invR = [1/max(ranges),1/min(ranges)];
@@ -2355,3 +2295,4 @@ end
 fprintf(['Numerics: MATLAB double precision; continuum coverage uses ', ...
     'analytical cell bounds.\n\n']);
 end
+    
