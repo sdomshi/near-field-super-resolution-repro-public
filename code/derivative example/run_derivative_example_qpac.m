@@ -22,29 +22,24 @@
 %
 % This code is provided "as is", without warranty of any kind.
 %
-% This single MATLAB file contains the complete LCS example implementation:
-% configuration, support-uniform LCS bound routines, deterministic sampling
-% diagnostics, QPAC constant assembly, and LaTeX table generation.
+% This single MATLAB file contains the derivative example implementation.
 % No external MATLAB files or input data files are required.
 % See the repository README for the complete terms of use.
 
 function out = run_derivative_example_qpac(opt)
-%RUN_DERIVATIVE_TWO_RANGE_QPAC Two-range, continuous-window QPAC example.
+%RUN_DERIVATIVE_DERIVATIVE_QPAC Verify QPAC for a derivative-based support class.
 %
-%   out = run_derivative_two_range_qpac();
-%   out = run_derivative_two_range_qpac(struct('farPoints',8001));
+%   out = run_derivative_example_qpac();
+%   out = run_derivative_example_qpac(struct('farPoints',8001));
 %
-% The support has one source on each of two *distinct* range rows.  Its
-% angles vary independently over two closed intervals.  The script bounds:
-%   (i)  support interactions using the fourth-order derivative branch;
-%   (ii) second derivatives at distinct support points;
-%   (iii) complete near sets by common-point row sums plus Lipschitz padding;
-%   (iv) complete far sets, including the opposite range row, by common-point
-%        row sums plus Lipschitz padding.
+% Each support contains one source on each of two distinct range rows. The
+% two angles vary independently over prescribed closed intervals. The code
+% computes the support-interaction, near-curvature, and far-leakage bounds
+% entering the QPAC recovery number.
 %
-% The padding is analytical. Floating-point values have an additional small
-% numerical reserve; for a machine-verified proof, repeat the calculations
-% with directed-rounding interval arithmetic. MATLAB base functions suffice.
+% Grid maxima are enlarged using analytic Lipschitz bounds. The reported
+% values are double-precision bounds with a small numerical reserve. A formal
+% numerical certificate would require directed-rounding interval arithmetic.
 
 if nargin < 1, opt = struct(); end
 assert(isstruct(opt) && isscalar(opt),'Options must be a scalar struct.');
@@ -62,7 +57,7 @@ assert(all([opt.supportPoints,opt.nearPoints,opt.farPoints]>=3) && ...
 assert(opt.batchSize>=1 && opt.batchSize==fix(opt.batchSize));
 assert(opt.roundingReserve>=0 && isfinite(opt.roundingReserve));
 
-%% Physical model and non-singleton support class
+%% Model and prescribed support class
 p = struct();
 p.Nr = 128;
 p.c0 = 3e8;
@@ -99,7 +94,7 @@ for j=1:2
 end
 supportFill = max(diff(p.windows,1,2))/(opt.supportPoints-1)/2;
 
-%% Support-support derivative branch, in both ordered directions
+%% Support-support bounds from the derivative branch
 u = zeros(1,4); % K,H,dK,dH
 dLower = inf;
 rhoUpper = 0;
@@ -141,7 +136,7 @@ Gamma=(eye(2)-G)\[1;0];
 Gamma=up(Gamma,opt);
 Xi=max(0,Gamma-[1;0]);
 
-%% Support curvature: exact sampled derivatives plus analytic padding
+%% Curvature margin at the support
 u2SS=zeros(1,2);
 for evalRow=1:2
     srcRow=3-evalRow;
@@ -166,7 +161,7 @@ Ecurv=up(2*(Xi(1)*UK2self+Xi(2)*UH2self)+ ...
 mNear=down(2*M.sigmaMin2-Ecurv,opt);
 assert(mNear>0,'The local curvature margin is not positive.');
 
-%% Near: cover every Taylor segment for both continuous support windows
+%% Bounds on the full near region
 near2=aggregate_grid(p,g,source,Gamma,M,opt,2);
 near3=aggregate_grid(p,g,source,Gamma,M,opt,3);
 D2=near2.upper;
@@ -174,7 +169,7 @@ D3=near3.upper;
 etaNear=up(2*p.delta*D3/(3*mNear)+ ...
     p.delta^2*D2^2/(2*mNear),opt);
 
-%% Far: q can lie on either row; only same-row source is excluded locally
+%% Leakage bound on the full far region
 far=aggregate_grid(p,g,source,Gamma,M,opt,0);
 etaFar=far.upper;
 CQ=up(max([etaSS,etaNear,etaFar]),opt);
@@ -364,8 +359,9 @@ H=E*S.Wh;
 end
 
 function out=aggregate_grid(p,g,source,Gamma,M,opt,order)
-% Continuum majorant from a common-evaluation tensor grid. The near tube
-% deliberately includes every admissible source-dependent Taylor segment.
+% Bound the common-evaluation row sum over the prescribed continuum. The
+% near region contains every source-dependent segment used in the Taylor
+% estimate.
 if order==0, count=opt.farPoints;
 else, count=opt.nearPoints;
 end
@@ -424,6 +420,10 @@ end
 
 function z=up(z,opt)
 z=z+opt.roundingReserve*max(1,abs(z));
+end
+
+function z=down(z,opt)
+z=z-opt.roundingReserve*max(1,abs(z));
 end
 
 function z=down(z,opt)
