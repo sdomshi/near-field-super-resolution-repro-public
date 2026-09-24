@@ -5,9 +5,9 @@ authors:
   - family-names: "Daei"
     given-names: "Sajad"
     email: "sajado@kth.se"
-version: "1.0.0"
+version: "1.0.1"
 date-released: 2026-09-24
-license: "LicenseRef-Sajad-Daei-All-Rights-Reserved"
+license-url: "https://github.com/sdomshi/near-field-super-resolution-repro-public/blob/v1.0.1/LICENSE"
 preferred-citation:
   type: article
   title: "A Mathematical Theory of Near-Field Super-Resolution"
