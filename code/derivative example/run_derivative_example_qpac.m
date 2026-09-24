@@ -1,4 +1,4 @@
-% Self-contained reproducibility code for the derivative QPAC example.
+% Rreproducibility code for the derivative QPAC example.
 % Paper: "A Mathematical Theory of Near-field Super-Resolution."
 % Author: Sajad Daei, KTH Royal Institute of Technology.
 % Email: sajado@kth.se
