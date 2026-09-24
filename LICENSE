@@ -1,0 +1,23 @@
+Copyright (c) 2026 Sajad Daei.
+Email: sajado@kth.se
+
+All rights reserved.
+
+This code was written by Sajad Daei and is provided as supplementary
+reproducibility material for the paper
+
+    S. Daei, G. Fodor, and M. Skoglund,
+    "A Mathematical Theory of Near-Field Super-Resolution."
+
+Permission is granted to download, inspect, and run the code for academic,
+non-commercial peer-review, verification, and reproducibility purposes.
+
+Any publication, preprint, report, presentation, or software work that uses
+this code, adapts this code, or uses numerical output derived from this code
+must cite the paper above.
+
+Redistribution, modification, incorporation into other software, commercial use,
+or public release of modified versions is not permitted without prior written
+permission from Sajad Daei.
+
+This code is provided "as is", without warranty of any kind, express or implied.
