@@ -7,6 +7,7 @@ authors:
     email: "sajado@kth.se"
 version: "1.0.1"
 date-released: 2026-09-24
+repository-code: "https://github.com/sdomshi/near-field-super-resolution-repro-public"
 license-url: "https://github.com/sdomshi/near-field-super-resolution-repro-public/blob/v1.0.1/LICENSE"
 preferred-citation:
   type: article
