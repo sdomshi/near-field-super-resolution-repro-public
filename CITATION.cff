@@ -1,14 +1,27 @@
 cff-version: 1.2.0
-message: "If you use this code or numerical output derived from it, cite the paper: A Mathematical Theory of Near-Field Super-Resolution."
+message: "If you use this software or numerical output derived from it, please cite both the software and the accompanying preprint."
 title: "Reproducibility code for A Mathematical Theory of Near-Field Super-Resolution"
+type: software
+
 authors:
   - family-names: "Daei"
     given-names: "Sajad"
     email: "sajado@kth.se"
-version: "1.0.1"
-date-released: 2026-09-24
+    orcid: "https://orcid.org/0000-0001-6866-6595"
+  - family-names: "Fodor"
+    given-names: "Gábor"
+    orcid: "https://orcid.org/0000-0002-2289-3159"
+  - family-names: "Skoglund"
+    given-names: "Mikael"
+    orcid: "https://orcid.org/0000-0002-7926-5081"
+
+version: "1.0.2"
+date-released: 2026-09-28
+doi: "NEW-V1.0.2-DOI"
+url: "https://doi.org/NEW-V1.0.2-DOI"
 repository-code: "https://github.com/sdomshi/near-field-super-resolution-repro-public"
-license-url: "https://github.com/sdomshi/near-field-super-resolution-repro-public/blob/v1.0.1/LICENSE"
+license-url: "https://github.com/sdomshi/near-field-super-resolution-repro-public/blob/v1.0.2/LICENSE"
+
 preferred-citation:
   type: article
   title: "A Mathematical Theory of Near-Field Super-Resolution"
@@ -16,7 +29,8 @@ preferred-citation:
     - family-names: "Daei"
       given-names: "Sajad"
     - family-names: "Fodor"
-      given-names: "Gabor"
+      given-names: "Gábor"
     - family-names: "Skoglund"
       given-names: "Mikael"
   year: 2026
+  url: "https://arxiv.org/abs/2609.31299"
