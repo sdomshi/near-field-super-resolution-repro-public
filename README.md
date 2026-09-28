@@ -122,7 +122,7 @@ https://arxiv.org/abs/2609.31299
 Sajad Daei, Gábor Fodor, and Mikael Skoglund, *Reproducibility code for
 A Mathematical Theory of Near-Field Super-Resolution*, version v1.0.2,
 Zenodo, 2026.  
-https://doi.org/NEW-V1.0.2-DOI
+[https://doi.org/NEW-V1.0.2-DOI](https://doi.org/10.5281/zenodo.22944092)
 
 
 ## Rights and permitted use
