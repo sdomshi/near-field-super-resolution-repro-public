@@ -4,11 +4,11 @@
 **Contact:** [sajado@kth.se](mailto:sajado@kth.se), 
 [sajaddaeiomshi@gmail.com](mailto:sajaddaeiomshi@gmail.com)
 
-This repository contains the MATLAB code used for the numerical examples and
-computational figures accompanying
+This repository contains the MATLAB reproducibility code accompanying
 
-> S. Daei, G. Fodor, and M. Skoglund,  
-> *A Mathematical Theory of Near-Field Super-Resolution*.
+> Sajad Daei, Gábor Fodor, and Mikael Skoglund,  
+> “[A Mathematical Theory of Near-Field Super-Resolution](https://arxiv.org/abs/2609.31299),”  
+> arXiv:2609.31299, 2026.
 
 The repository contains four primary, self-contained MATLAB functions. No
 external input datasets are required.
@@ -17,10 +17,10 @@ external input datasets are required.
 
 | Paper component | MATLAB entry point |
 | --- | --- |
-| Derivative-route QPAC support-class evaluation | [`derivative example/run_derivative_example_qpac.m`](derivative%20example/run_derivative_example_qpac.m) |
-| Lag-correlation-support QPAC evaluation | [`lcs_example/run_lcs_example_qpac.m`](lcs_example/run_lcs_example_qpac.m) |
-| Finite-harmonic lifted dual-polynomial experiment | [`dual_polynomial_figure/run_lifted_dual_figure1_repro.m`](dual_polynomial_figure/run_lifted_dual_figure1_repro.m) |
-| Exact-kernel and QPAC-bound comparison plots | [`kernel bounds/run_bounds_true_kernel_repro.m`](kernel%20bounds/run_bounds_true_kernel_repro.m) |
+| Derivative-route QPAC support-class evaluation | [`code/derivative example/run_derivative_example_qpac.m`](code/derivative%20example/run_derivative_example_qpac.m) |
+| Lag-correlation-support QPAC evaluation | [`code/lcs_example/run_lcs_example_qpac.m`](code/lcs_example/run_lcs_example_qpac.m) |
+| Finite-harmonic lifted dual-polynomial experiment | [`code/dual polynomial figure/run_lifted_dual_figure1_repro.m`](code/dual%20polynomial%20figure/run_lifted_dual_figure1_repro.m) |
+| Exact-kernel and QPAC-bound comparison plots | [`code/kernel bounds/run_bounds_true_kernel_repro.m`](code/kernel%20bounds/run_bounds_true_kernel_repro.m) |
 
 Each experiment directory contains a separate README with its mathematical
 scope, execution instructions, and generated outputs.
@@ -45,7 +45,7 @@ repo_root = pwd;
 ### 1. Derivative-route QPAC example
 
 ```matlab
-cd(fullfile(repo_root, 'derivative example'));
+cd(fullfile(repo_root, 'code', 'derivative example'));
 row = run_derivative_example_qpac();
 ```
 
@@ -55,7 +55,7 @@ paper-facing LaTeX tables and a MATLAB results file.
 ### 2. Lag-correlation-support QPAC example
 
 ```matlab
-cd(fullfile(repo_root, 'lcs_example'));
+cd(fullfile(repo_root, 'code', 'lcs_example'));
 result = run_lcs_example_qpac();
 ```
 
@@ -65,7 +65,7 @@ reported LaTeX table and MATLAB results file.
 ### 3. Finite-harmonic lifted dual-polynomial experiment
 
 ```matlab
-cd(fullfile(repo_root, 'dual_polynomial_figure'));
+cd(fullfile(repo_root, 'code', 'dual polynomial figure'));
 result = run_lifted_dual_figure1_repro();
 ```
 
@@ -78,7 +78,7 @@ the source amplitudes, and writes:
 ### 4. Exact-kernel and QPAC-bound figures
 
 ```matlab
-cd(fullfile(repo_root, 'kernel bounds'));
+cd(fullfile(repo_root, 'code', 'kernel bounds'));
 out = run_bounds_true_kernel_repro();
 ```
 
@@ -106,9 +106,23 @@ finite-harmonic lifted surrogate.
 - Solver iteration counts and the last reported digits can depend on the
   MATLAB, BLAS, CVX, and SDPT3 versions.
 
-## Citing the code
- Cite both the paper and the archived
-software release.
+## Citation
+
+If you use this repository or numerical results produced by it, please cite
+both the preprint and the archived software release.
+
+### Preprint
+
+Sajad Daei, Gábor Fodor, and Mikael Skoglund, “A Mathematical Theory of
+Near-Field Super-Resolution,” arXiv:2609.31299, 2026.  
+https://arxiv.org/abs/2609.31299
+
+### Software
+
+Sajad Daei, Gábor Fodor, and Mikael Skoglund, *Reproducibility code for
+A Mathematical Theory of Near-Field Super-Resolution*, version v1.0.2,
+Zenodo, 2026.  
+https://doi.org/NEW-V1.0.2-DOI
 
 
 ## Rights and permitted use
