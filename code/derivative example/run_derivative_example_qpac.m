@@ -426,6 +426,3 @@ function z=down(z,opt)
 z=z-opt.roundingReserve*max(1,abs(z));
 end
 
-function z=down(z,opt)
-z=z-opt.roundingReserve*max(1,abs(z));
-end
